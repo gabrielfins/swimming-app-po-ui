@@ -20,7 +20,8 @@ export const defaultTheme: PoTheme = {
         },
         onRoot: {
           '--font-family': `'Plus Jakarta Sans', sans-serif`,
-          '--font-family-theme': `'Plus Jakarta Sans', sans-serif`
+          '--font-family-theme': `'Plus Jakarta Sans', sans-serif`,
+          '--font-family-heading': `'Plus Jakarta Sans', sans-serif`
         }
       },
       a11y: PoThemeA11yEnum.AA

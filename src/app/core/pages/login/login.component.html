@@ -1,1 +1,6 @@
-<p>login works!</p>,
+<h3>Login</h3>
+<form [formGroup]="form" (ngSubmit)="login()">
+  <po-input p-label="CPF" p-icon="an an-user" p-placeholder="000.000.000-00" p-mask="999.999.999-99" formControlName="cpf" />
+  <po-password p-label="Senha" formControlName="senha" />
+  <po-button p-label="Entrar" p-kind="primary" [p-type]="buttonType" p-size="sm" />
+</form>

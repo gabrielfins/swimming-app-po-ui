@@ -1,22 +1,38 @@
-import { provideRouter } from '@angular/router';
+import { provideRouter, withComponentInputBinding, withViewTransitions } from '@angular/router';
 
 import { routes } from './app.routes';
-import { provideClientHydration, withEventReplay } from '@angular/platform-browser';
 
-import { ApplicationConfig, importProvidersFrom, provideZoneChangeDetection } from '@angular/core';
-import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
-
-import { PoHttpRequestModule } from '@po-ui/ng-components';
-import { provideServerRendering, withRoutes } from '@angular/ssr';
-import { serverRoutes } from './app.routes.server';
+import { provideHttpClient, withInterceptors } from '@angular/common/http';
+import { ApplicationConfig, importProvidersFrom, inject, provideAppInitializer, provideZoneChangeDetection } from '@angular/core';
+import { JwtModule } from '@auth0/angular-jwt';
+import { AuthService } from './shared/services/auth.service';
+import { DataService } from './shared/services/data.service';
+import { firstValueFrom, of, switchMap } from 'rxjs';
+import { tokenInterceptor } from './shared/interceptors/token.interceptor';
 
 export const appConfig: ApplicationConfig = {
   providers: [
-    provideServerRendering(withRoutes(serverRoutes)),
-    provideRouter(routes),
-    provideHttpClient(),
-    importProvidersFrom([PoHttpRequestModule]),
+    provideRouter(routes, withComponentInputBinding(), withViewTransitions()),
+    provideHttpClient(withInterceptors([tokenInterceptor])),
     provideZoneChangeDetection({ eventCoalescing: true }),
-    provideHttpClient(withInterceptorsFromDi())
+    importProvidersFrom(
+      JwtModule.forRoot({})
+    ),
+    provideAppInitializer(async () => {
+      const authService = inject(AuthService);
+      const dataService = inject(DataService);
+
+      const loading$ = authService.loginFromToken().pipe(
+        switchMap((user) => {
+          if (user) {
+            return dataService.getAllData();
+          } else {
+            return of(user);
+          }
+        })
+      );
+
+      await firstValueFrom(loading$);
+    }),
   ],
 };
